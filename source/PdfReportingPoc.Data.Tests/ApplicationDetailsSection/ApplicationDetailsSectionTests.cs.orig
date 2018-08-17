@@ -1,0 +1,737 @@
+<<<<<<< HEAD:source/PdfReportingPoc.Data.Tests/ApplicationDetailsSection/ApplicationDetailsSectionTests.cs
+﻿using System;
+using Aspose.Pdf;
+=======
+﻿using Aspose.Pdf;
+>>>>>>> exploring signature field:source/PdfReportingPoc.Data.Tests/Elements/TableElementTests.cs.orig
+using Aspose.Pdf.Text;
+using FluentAssertions;
+using NUnit.Framework;
+using PdfReportingPoc.Domain.Pdf;
+using PdfReportingPoc.Elements;
+using System.Collections.Generic;
+using System.IO;
+using PdfReportingPoc.Domain.Elements;
+
+namespace PdfReportingPoc.Data.Tests.ApplicationDetailsSection
+{
+    [TestFixture]
+    public class ApplicationDetailsSectionTests
+    {
+        [Test]
+        public void Render_GivenApplicationDetailsForLoanAmountAndReason_ShouldDisplayLoanDetailsSection()
+        {
+            //Arrange
+<<<<<<< HEAD:source/PdfReportingPoc.Data.Tests/ApplicationDetailsSection/ApplicationDetailsSectionTests.cs
+            var fileName = "blank.pdf";
+=======
+            var fileName = "Signature.pdf";
+            var fileBytes = GetFileBytes(fileName);
+            var table = GetTable();
+
+            //Act
+            var actual = table.Render(fileBytes);
+
+            //Assert
+            var expected = fileBytes.Length;
+            actual.Length.Should().BeGreaterThan(expected);
+        }
+
+        [Test]
+        public void Render_Given4RowsToAddToATable_ShouldAddRowsToTableAndReturnFileBytes()
+        {
+            //Arrange
+            var fileName = "Signature.pdf";
+>>>>>>> exploring signature field:source/PdfReportingPoc.Data.Tests/Elements/TableElementTests.cs.orig
+            var fileBytes = GetFileBytes(fileName);
+            var table = new TableElement
+            {
+                Layout = new TableLayout()
+                {
+                    CellMargin = new MarginInfo(2f, 2f, 2f, 2f),
+                    Position = 100f,
+                    CellBorder = new BorderInfo(BorderSide.None, 0.20f),
+                    ColumnAdjustment = ColumnAdjustment.AutoFitToWindow
+                },
+                Rows = new List<IRow>
+                {
+                    new RowElement
+                    {
+<<<<<<< HEAD:source/PdfReportingPoc.Data.Tests/ApplicationDetailsSection/ApplicationDetailsSectionTests.cs
+                       Cells = new List<ICell>
+                       {
+                           new TextCell {
+                               TextPropertiesRequest = new TextPropertiesRequest
+                               {
+                                  Text = "Application Details:",
+                                  FontSize = 10,
+                                  FontType = "Arial",
+                                  FontStyle = FontStyles.Bold,
+                                  FontColor = Color.Black,
+                                  Invisible = false
+                               }
+                           }
+                       }
+                    },
+                    new RowElement()
+                    {
+                        Cells = new List<ICell>
+                        {
+                             new TextCell {
+                                 TextPropertiesRequest = new TextPropertiesRequest
+                                 {
+                                       Text = "Requested Loan Amount:",
+                                       FontSize = 10,
+                                       FontType = "Arial",
+                                       FontStyle = FontStyles.Regular,
+                                       FontColor = Color.Black,
+                                       Invisible = false
+                                 }
+                             },
+                             new TextBoxCell
+                             {
+                                 TextBoxRequest =  new TextBoxRequest()
+                                 {
+                                       Id = "txtAmount",
+                                       Height = 20,
+                                       Width = 200,
+                                       MaxLen = 22,
+                                       Required = true,
+                                       ForceComb = false
+                                 }
+                             },
+                        }
+                    },
+                    new RowElement()
+                    {
+                        Cells = new List<ICell>
+=======
+                        new RowElement
+                        {
+                            Cells = new List<ICell>
+                            {
+                                new TextCell{
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "Lauren",
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }
+                                },
+                            }
+                        },
+                        new RowElement
+                        {
+                            Cells = new List<ICell>
+                            {
+                                new TextCell {  TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "Alex",
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                            }
+                        },
+                        new RowElement
+>>>>>>> exploring signature field:source/PdfReportingPoc.Data.Tests/Elements/TableElementTests.cs.orig
+                        {
+                             new TextCell {
+                                 TextPropertiesRequest = new TextPropertiesRequest
+                                 {
+                                        Text = "What will you use this loan for?",
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+<<<<<<< HEAD:source/PdfReportingPoc.Data.Tests/ApplicationDetailsSection/ApplicationDetailsSectionTests.cs
+                                 }
+                             },
+                             new TextBoxCell
+                             {
+                                 TextBoxRequest =  new TextBoxRequest()
+                                 {
+                                        Id = "txtReasonForLoan",
+                                        Height = 20,
+                                        Width = 250,
+                                        MaxLen = 22,
+                                        Required = true,
+                                        ForceComb = false
+                                 }
+                             }
+                        }
+=======
+                                    }},
+                            }
+
+                        },
+                        new RowElement
+                        {
+                            Cells = new List<ICell>
+                            {
+                                new TextCell {  TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "Sipho",
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                            }
+                        },
+>>>>>>> exploring signature field:source/PdfReportingPoc.Data.Tests/Elements/TableElementTests.cs.orig
+                    }
+                }
+            };
+
+            //Act
+            var actual = table.Render(fileBytes);
+            //Assert
+            var expected = fileBytes.Length;
+            actual.Length.Should().BeGreaterThan(expected);
+        }
+
+        [Test]
+<<<<<<< HEAD:source/PdfReportingPoc.Data.Tests/ApplicationDetailsSection/ApplicationDetailsSectionTests.cs
+        public void Render_GivenApplicationDetailsSection_ShouldAddRowsToTableAndReturnFileBytes()
+=======
+        public void Render_Given1RowsToAddToATable_ShouldAddRowsToTableAndReturnFileBytes()
+        {
+            //Arrange
+            var fileName = "Signature.pdf";
+            var fileBytes = GetFileBytes(fileName);
+            var table = new TableElement
+            {
+                Layout = new TableLayout()
+                {
+                    CellMargin = new MarginInfo(2f, 2f, 2f, 2f),
+                    Position = 100f,
+                    Widths = "85 92 130 120",
+                    CellBorder = new BorderInfo(BorderSide.All, 0.20f),
+                    ColumnAdjustment = ColumnAdjustment.Customized
+                },
+                Rows = new List<IRow>
+                    {
+                        new RowElement
+                        {
+                            Cells = new List<ICell>
+                            {
+                                new TextCell{
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "Lauren",
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }
+                                },
+                                new TextBoxCell{
+                                    TextBoxRequest = new TextBoxRequest{
+                                        Id = "Name",
+                                        Height = 16,
+                                        Width = 70,
+                                        MaxLen = 10,
+                                        Required = true,
+                                        ForceComb = true,
+                                    }
+                                },
+                                new TextBoxCell{
+                                    TextBoxRequest = new TextBoxRequest{
+                                        Id = "Name",
+                                        Height = 16,
+                                        Width = 70,
+                                        MaxLen = 10,
+                                        Required = true,
+                                        ForceComb = true,
+                                    }
+                                }
+                            }
+                        }
+                   }
+            };
+
+            //Act
+            var actual = table.Render(fileBytes);
+
+            //Assert
+            var expected = fileBytes.Length;
+            actual.Length.Should().BeGreaterOrEqualTo(expected);
+        }
+
+
+        [Test]
+        public void Render_GivenCellsWithCombsEnabled_ShouldReturnFileBytes()
+        {
+            //Arrange
+            var fileName = "Signature.pdf";
+            var fileBytes = GetFileBytes(fileName);
+            var table = new TableElement
+            {
+                Layout = new TableLayout()
+                {
+                    CellMargin = new MarginInfo(2f, 2f, 2f, 2f),
+                    Position = 100f,
+                    Widths = "85 92 130 120",
+                    CellBorder = new BorderInfo(BorderSide.All, 0.20f),
+                    ColumnAdjustment = ColumnAdjustment.Customized
+                },
+                Rows = new List<IRow>
+                    {
+                        new RowElement
+                        {
+                            Cells = new List<ICell>
+                            {
+                                new TextCell{
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "Lauren",
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }
+                                },
+                                new TextBoxCell{
+                                    TextBoxRequest = new TextBoxRequest{
+                                        Id = "Surname",
+                                        Height = 16,
+                                        Width = 70,
+                                        MaxLen = 10,
+                                        Required = true,
+                                        ForceComb = true,
+                                    }
+                                },
+                                new TextBoxCell{
+                                    TextBoxRequest = new TextBoxRequest{
+                                        Id = "Name",
+                                        Height = 16,
+                                        Width = 70,
+                                        MaxLen = 10,
+                                        Required = true,
+                                        ForceComb = true,
+                                    }
+                                }
+                            }
+                        },
+                         new RowElement
+                        {
+                            Cells = new List<ICell>
+                            {
+                                new TextCell{
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "Bob",
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }
+                                },
+                                new TextBoxCell{
+                                    TextBoxRequest = new TextBoxRequest{
+                                        Id = "Age",
+                                        Height = 16,
+                                        Width = 70,
+                                        MaxLen = 10,
+                                        Required = true,
+                                        ForceComb = true,
+                                    }
+                                },
+                                 new TextCell{
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "Sne",
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }
+                                }
+                            }
+                        }
+                   }
+            };
+
+            //Act
+            var actual = table.Render(fileBytes);       
+
+            //Assert
+            var expected = fileBytes.Length;
+            actual.Length.Should().BeGreaterOrEqualTo(expected);
+        }
+
+        [Test]
+        public void Render_Given3CellsToAddToATable_ShouldAddCellsToTableAndReturnFileBytes()
+>>>>>>> exploring signature field:source/PdfReportingPoc.Data.Tests/Elements/TableElementTests.cs.orig
+        {
+            //Arrange
+            var fileName = "blank.pdf";
+            var fileBytes = GetFileBytes(fileName);
+            var table = new TableElement
+            {
+                Layout = new TableLayout()
+                {
+                    CellMargin = new MarginInfo(2f, 2f, 2f, 2f),
+                    Position = 200f,
+                    Widths = "50 100 100 80 100",
+                    CellBorder = new BorderInfo(BorderSide.All, 0.20f),
+                    ColumnAdjustment = ColumnAdjustment.Customized
+                },
+                Rows = new List<IRow>
+                {
+                    new RowElement
+                        {
+                            Cells = new List<ICell>
+                            {
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "Salutation",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+<<<<<<< HEAD:source/PdfReportingPoc.Data.Tests/ApplicationDetailsSection/ApplicationDetailsSectionTests.cs
+                                    TextPropertiesRequest = new TextPropertiesRequest
+=======
+                                     TextPropertiesRequest = new TextPropertiesRequest
+>>>>>>> exploring signature field:source/PdfReportingPoc.Data.Tests/Elements/TableElementTests.cs.orig
+                                    {
+                                        Text = "Full Name",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+<<<<<<< HEAD:source/PdfReportingPoc.Data.Tests/ApplicationDetailsSection/ApplicationDetailsSectionTests.cs
+                                    TextPropertiesRequest = new TextPropertiesRequest
+=======
+                                      TextPropertiesRequest = new TextPropertiesRequest
+>>>>>>> exploring signature field:source/PdfReportingPoc.Data.Tests/Elements/TableElementTests.cs.orig
+                                    {
+                                        Text = "Identity Number",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+<<<<<<< HEAD:source/PdfReportingPoc.Data.Tests/ApplicationDetailsSection/ApplicationDetailsSectionTests.cs
+                                    }},
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "Role",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "Signature",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }}
+                            }
+                        },
+                    new RowElement
+=======
+                                    }
+                                  }
+                       }
+                    },
+                }
+            };
+
+            //Act
+            var actual = table.Render(fileBytes);
+
+            //Assert
+            var expected = fileBytes.Length;
+            actual.Length.Should().BeGreaterThan(expected);
+        }
+
+        [Test]
+        public void CreateTextBox_GivenTextBoxPropertiesAndPosition_ShouldReturnATextBox()
+        {
+            //Arrange
+            var fileName = "Signature.pdf";
+            var fileBytes = GetFileBytes(fileName);
+            var table = GetTable();
+
+            //Act
+            var actual = table.Render(fileBytes);
+
+            //Assert
+            var expected = fileBytes.Length;
+            actual.Length.Should().BeGreaterThan(expected);
+        }
+
+<<<<<<< HEAD
+=======
+
+
+        [Test]
+        public void Signature()
+        {
+            //Arrange
+
+            var fileName = "blank.pdf";
+            var fileBytes = GetFileBytes(fileName);
+
+            var sut = new SignatureCell();
+            //Act
+            var actual = sut.Signature(fileBytes);
+
+            File.WriteAllBytes(@"C:\Users\moniqueg\Desktop\New folder\fillllle.pdf", actual);
+            //Assert
+            var expected = fileBytes.Length;
+            actual.Length.Should().BeGreaterThan(0);
+        }
+
+>>>>>>> exploring signature field
+        private TableElement GetTable()
+        {
+            return new TableElement
+            {
+                Layout = new TableLayout()
+                {
+                    CellMargin = new MarginInfo(2f, 2f, 2f, 2f),
+                    Position = 100f,
+                    Widths = "85 92 130 120",
+                    CellBorder = new BorderInfo(BorderSide.All, 0.20f),
+                    ColumnAdjustment = ColumnAdjustment.Customized
+                },
+                Rows = new List<IRow>
+                {
+                        new RowElement
+>>>>>>> exploring signature field:source/PdfReportingPoc.Data.Tests/Elements/TableElementTests.cs.orig
+                        {
+                            Cells = new List<ICell>
+                            {
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextBoxCell {
+                                    TextBoxRequest =  new TextBoxRequest()
+                                    {
+                                         Id = "signatureField1",
+                                         Height = 20,
+                                         Width = 80,
+                                         MaxLen = 10,
+                                         Required = true,
+                                         ForceComb = false
+                                    }
+                                }
+                            }
+                        },
+                    new RowElement
+                        {
+                            Cells = new List<ICell>
+                            {
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextBoxCell {
+                                    TextBoxRequest =  new TextBoxRequest()
+<<<<<<< HEAD:source/PdfReportingPoc.Data.Tests/ApplicationDetailsSection/ApplicationDetailsSectionTests.cs
+                                    {
+                                         Id = "signatureField2",
+                                         Height = 20,
+                                         Width = 80,
+                                         MaxLen = 10,
+                                         Required = true,
+                                         ForceComb = false
+                                    }
+=======
+                                        {
+                                            Id = "txtName",
+                                            Height = 20,
+                                            Width = 130,
+                                            MaxLen = 10,
+                                            Required = true,
+                                            ForceComb = false,
+                                        },
+>>>>>>> exploring signature field:source/PdfReportingPoc.Data.Tests/Elements/TableElementTests.cs.orig
+                                }
+                            }
+
+                        },
+                    new RowElement
+                        {
+                            Cells = new List<ICell>
+                            {
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    TextPropertiesRequest = new TextPropertiesRequest
+                                    {
+                                        Text = "",
+                                        FontSize = 8,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextBoxCell {
+                                    TextBoxRequest =  new TextBoxRequest()
+                                    {
+                                         Id = "signatureField3",
+                                         Height = 20,
+                                         Width = 80,
+                                         MaxLen = 10,
+                                         Required = true,
+                                         ForceComb = false
+                                    }
+                                }
+                            }
+
+                    }
+                }
+            };
+
+            //Act
+            var actual = table.Render(fileBytes);
+            //Assert
+            var expected = fileBytes.Length;
+            actual.Length.Should().BeGreaterOrEqualTo(expected);
+        }
+
+        private byte[] GetFileBytes(string text)
+        {
+            if (text.Contains("\\"))
+            {
+                return File.ReadAllBytes(text);
+            }
+            var baseDirectory = TestContext.CurrentContext.TestDirectory + "\\TestData\\";
+            var currentFilePath = Path.Combine(baseDirectory, text);
+            var fileBytes = File.ReadAllBytes(currentFilePath);
+
+            return fileBytes;
+        }
+    }
+}

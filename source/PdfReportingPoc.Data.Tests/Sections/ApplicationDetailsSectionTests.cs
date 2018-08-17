@@ -1,0 +1,299 @@
+﻿using System.Collections.Generic;
+using System.IO;
+using Aspose.Pdf;
+using Aspose.Pdf.Text;
+using FluentAssertions;
+using NUnit.Framework;
+using PdfReportingPoc.Domain.Elements;
+using PdfReportingPoc.Domain.Elements.Cell;
+using PdfReportingPoc.Domain.Elements.Cells;
+using PdfReportingPoc.Elements;
+using PdfReportingPoc.Elements.Cells;
+using Row = PdfReportingPoc.Elements.Row;
+using Table = PdfReportingPoc.Elements.Table;
+
+namespace PdfReportingPoc.Data.Tests.Sections
+{
+    [TestFixture]
+    public class ApplicationDetailsSectionTests
+    {
+        [Test]
+        public void Render_GivenApplicationDetailsForLoanAmountAndReason_ShouldDisplayLoanDetailsSection()
+        {
+            //Arrange
+            var fileName = "blank.pdf";
+            var fileBytes = GetFileBytes(fileName);
+            var textProperties = new TextProperties
+            {
+                FontSize = 10,
+                FontType = "Arial",
+                FontStyle = FontStyles.Regular,
+                FontColor = Color.Black,
+                Invisible = false
+            };
+            var table = GetAppliactionDetailsTable(textProperties);
+
+            //Act
+            var actual = table.Render(fileBytes);
+
+            //Assert
+            var expected = fileBytes.PdfBytes.Length;
+            actual.PdfBytes.Length.Should().BeGreaterThan(expected);
+        }
+
+      
+        [Test]
+        public void Render_GivenApplicationDetailsSection_ShouldAddRowsToTableAndReturnFileBytes()
+        {
+            //Arrange
+            var fileName = "blank.pdf";
+            var tableRenderData = GetFileBytes(fileName);
+            var textProperties = new TextProperties
+            {
+                FontSize = 8,
+                FontType = "Arial",
+                FontStyle = FontStyles.Bold,
+                FontColor = Color.Black,
+                Invisible = false
+            };
+            
+            var table = GetApplicationDetailsSignatureTable(textProperties);
+
+            //Act
+            var actual = table.Render(tableRenderData);
+
+            //Assert
+            var expected = tableRenderData.PdfBytes.Length;
+            actual.PdfBytes.Length.Should().BeGreaterOrEqualTo(expected);
+        }
+
+        private static Table GetApplicationDetailsSignatureTable(TextProperties textProperties)
+        {
+            return new Table
+            {
+                Layout = new TableLayout
+                {
+                    CellMargin = new MarginInfo(2f, 2f, 2f, 2f),
+                    Top = 200f,
+                    Widths = "50 100 100 80 110",
+                    CellBorder = new BorderInfo(BorderSide.None, 0.20f),
+                    ColumnAdjustment = ColumnAdjustment.Customized
+                },
+                Rows = new List<IRow>
+                {
+                    new Row
+                    {
+                        Cells = new List<ICell>
+                            {
+                                new Text {
+                                    DisplayText = "Title",
+                                    TextProperties = textProperties
+
+                                },
+                                new Text {
+                                    DisplayText = "Full Name",
+                                    TextProperties = textProperties
+
+                                },
+                                new Text {
+                                    DisplayText = "Identity Number",
+                                    TextProperties = textProperties
+
+                                },
+                                new Text {
+                                    DisplayText = "Role",
+                                    TextProperties = textProperties
+
+                                },
+                                new Text {
+                                    DisplayText = "Signature",
+                                    TextProperties = textProperties
+
+                                }
+                            }
+                    },
+                    new Row
+                    {
+                        Cells = new List<ICell>
+                            {
+                                new Text {
+                                    DisplayText = string.Empty,
+                                    TextProperties = textProperties
+                                },
+                                new Text {
+                                    DisplayText = string.Empty,
+                                    TextProperties = textProperties
+                                },
+                                new Text {
+                                    DisplayText = string.Empty,
+                                    TextProperties = textProperties
+                                },
+                                new Text {
+                                    DisplayText = string.Empty,
+                                    TextProperties = textProperties
+                                },
+
+                                new Signature
+                                {
+                                    SignatureProperties =  new SignatureProperties
+                                    {
+                                        PartialName = "signature1",
+                                        Height = 20,
+                                        Width = 100,
+                                    }
+                                }
+                            }
+                    },
+                    new Row
+                    {
+                        Cells = new List<ICell>
+                            {
+                                new Text {
+                                    DisplayText = string.Empty,
+                                    TextProperties = textProperties
+                                },
+                                new Text {
+                                    DisplayText = string.Empty,
+                                    TextProperties = textProperties
+                                },
+                                new Text {
+                                    DisplayText = string.Empty,
+                                    TextProperties = textProperties
+                                },
+                                new Text {
+                                    DisplayText = string.Empty,
+                                    TextProperties = textProperties
+                                },
+                                new Signature
+                                {
+                                    SignatureProperties =  new SignatureProperties
+                                    {
+                                        PartialName = "signature2",
+                                        Height = 20,
+                                        Width = 100
+                                    }
+                                }
+                            }
+                    },
+                    new Row
+                    {
+                        Cells = new List<ICell>
+                            {
+                                new Text {
+                                    DisplayText = string.Empty,
+                                    TextProperties = textProperties
+                                },
+                                new Text {
+                                    DisplayText = string.Empty,
+                                    TextProperties = textProperties
+                                },
+                                new Text {
+                                    DisplayText = string.Empty,
+                                    TextProperties = textProperties
+                                },
+                                new Text {
+                                    DisplayText = string.Empty,
+                                    TextProperties = textProperties
+                                },
+                                new Signature
+                                {
+                                    SignatureProperties =  new SignatureProperties
+                                    {
+                                        PartialName = "signature3",
+                                        Height = 20,
+                                        Width = 100
+                                    }
+                                }
+                            }
+
+                    }
+                },     
+            };
+        }
+
+        private static Table GetAppliactionDetailsTable(TextProperties textProperties)
+        {
+            return new Table
+            {
+                Layout = new TableLayout
+                {
+                    CellMargin = new MarginInfo(2f, 2f, 2f, 2f),
+                    Top = 100f,
+                    CellBorder = new BorderInfo(BorderSide.None, 0.20f),
+                    ColumnAdjustment = ColumnAdjustment.AutoFitToWindow
+                },
+                Rows = new List<IRow>
+                {
+                    new Row
+                    {
+                       Cells = new List<ICell>
+                       {
+                           new Text {
+                               DisplayText = "Application Details:",
+                               TextProperties = textProperties
+                           }
+                       }
+                    },
+                    new Row
+                    {
+                        Cells = new List<ICell>
+                        {
+                             new Text {
+                                 DisplayText = "Requested Loan Amount:",
+                                 TextProperties = textProperties
+                             },
+                             new TextBox
+                             {
+                                 Id = "txtAmount",
+                                 TextBoxProperties =  new TextBoxProperties
+                                 {
+                                       Height = 20,
+                                       Width = 200,
+                                       MaxLen = 22,
+                                       Required = true,
+                                       ForceComb = false,
+                                     Type = "number"
+                                 }
+                             },
+                        }
+                    },
+                    new Row
+                    {
+                        Cells = new List<ICell>
+                        {
+                             new Text {
+                                 DisplayText = "What will you use this loan for?",
+                                 TextProperties = textProperties
+                             },
+                             new TextBox
+                             {
+                                 Id = "txtReasonForLoan",
+                                 TextBoxProperties =  new TextBoxProperties
+                                 {
+                                        Height = 20,
+                                        Width = 250,
+                                        MaxLen = 22,
+                                        Required = true,
+                                        ForceComb = false,
+                                     Type = "number"
+                                 }
+                             }
+                        }
+                    }
+                }
+            };
+        }
+
+        private TableRenderData GetFileBytes(string text)
+        {
+            var baseDirectory = TestContext.CurrentContext.TestDirectory + "\\TestData\\";
+            var currentFilePath = Path.Combine(baseDirectory, text);
+            var fileBytes = File.ReadAllBytes(currentFilePath);
+
+            return new TableRenderData
+            {
+                PdfBytes = fileBytes
+            };
+        }
+    }
+}

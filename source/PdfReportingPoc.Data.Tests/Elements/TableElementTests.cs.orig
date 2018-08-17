@@ -1,0 +1,446 @@
+﻿using Aspose.Pdf;
+using Aspose.Pdf.Text;
+using FluentAssertions;
+using NUnit.Framework;
+using PdfReportingPoc.Domain.Pdf;
+using PdfReportingPoc.Elements;
+using System.Collections.Generic;
+using System.IO;
+using PdfReportingPoc.Domain.Elements;
+using Aspose.Pdf.Forms;
+using PdfReportingPoc.Elements.Cells;
+using Row = PdfReportingPoc.Elements.Row;
+using Table = PdfReportingPoc.Elements.Table;
+
+namespace PdfReportingPoc.Data.Tests.Elements
+{
+    [TestFixture]
+    public class TableElementTests
+    {
+        [Test]
+        public void Ctor_ShouldCreateDefaultLayout()
+        {
+            // Arrange
+            // Act
+            var sut = new Table();
+            // Assert
+            Assert.NotNull(sut.Layout);
+        }
+
+        [Test]
+        public void Render_GivenTableDetails_ShouldCreateAndPopulateTableAndReturnFileBytes()
+        {
+            //Arrange
+            var fileName = "Signature.pdf";
+            var fileBytes = GetFileBytes(fileName);
+            var table = GetTable();
+
+            //Act
+            var actual = table.Render(fileBytes);
+
+            //Assert
+            var expected = fileBytes.Length;
+            actual.Length.Should().BeGreaterThan(expected);
+        }
+
+        [Test]
+        public void Render_CheckBox_ShouldCreateAndPopulateTableAndReturnFileBytes()
+        {
+            //Arrange
+            var fileName = "Signature.pdf";
+            var fileBytes = GetFileBytes(fileName);
+            var textProperties = new TextProperties
+            {
+                FontSize = 15,
+                FontType = "Arial",
+                FontStyle = FontStyles.Bold,
+                FontColor = Color.Black,
+                Invisible = false
+            };
+            var table = new Table
+            {
+                Layout = new TableLayout
+                {
+                    CellMargin = new MarginInfo(2f, 2f, 2f, 2f),
+                    Position = 100f,
+                    Widths = "70",
+                    ColumnAdjustment = ColumnAdjustment.Customized
+                },
+                Rows = new List<IRow>
+                {
+                        new Row
+                        {
+                            Cells = new List<ICell>
+                            {
+                                new TextCell {
+                                    Text = "Gender",
+                                    TextProperties = textProperties},
+                                new TextCell {
+                                    Text = string.Empty,
+                                    TextProperties = textProperties},
+                                new TextCell {
+                                    Text = "Status",
+                                    TextProperties = textProperties
+                                },
+                                new TextCell {
+                                    Text = string.Empty,
+                                    TextProperties = textProperties
+                                },
+                            }
+                        },
+                         new Row
+                         {
+                            Cells = new List<ICell>
+                            {
+                                new TextCell
+                                {
+                                    Text = "Male",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }
+                                },
+                                new CheckboxCell
+                                {
+                                   CheckboxRequest = new CheckboxRequest{
+                                        Id = "Male",
+                                        Width = 30,
+                                        Height=30,
+                                        Required=true,
+                                   }
+                                },
+                                new TextCell
+                                {
+                                    Text = "Single",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                   }
+                                },
+                                new RadioButtonCell
+                                {
+                                  TextBoxRequest =  new TextBoxProperties()
+                                  {
+                                        Id = "Single",
+                                        Height = 30,
+                                        Width = 30
+                                  },
+                                  RadioButtonRequest = new RadioButtonRequest()
+                                   {
+                                       OptionName = "MarriedRadioButton",
+                                       Style = BoxStyle.Check
+                                   }
+                                },
+
+                            }
+                         },
+                         new Row
+                         {
+                            Cells = new List<ICell>
+                            {
+                                new TextCell
+                                {
+                                    Text = "Female",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }
+                                },
+                               new CheckboxCell
+                               {
+                                  CheckboxRequest = new CheckboxRequest
+                                  {
+                                        Id = "Female",
+                                        Width = 30,
+                                        Height=30,
+                                        Required=true,
+                                  }
+                               },
+                                 new TextCell {
+                                    Text = "Married",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }
+                                 },
+                                new RadioButtonCell
+                                {
+                                   TextBoxRequest =  new TextBoxProperties()
+                                   {
+                                        Id = "MarriedTxtBox",
+                                        Height = 30,
+                                        Width = 30
+                                   },
+                                   RadioButtonRequest = new RadioButtonRequest()
+                                   {
+                                       OptionName = "MarriedRadioButton",
+                                       Style = BoxStyle.Check
+                                   }
+
+                                }
+
+                            }
+                         }
+                }
+            };
+
+            //Act
+            var actual = table.Render(fileBytes);
+<<<<<<< HEAD
+=======
+
+>>>>>>> removed hard coded path
+            //Assert
+            var expected = fileBytes.Length;
+            actual.Length.Should().BeGreaterThan(expected);
+        }
+
+        [Test]
+        public void Render_SignatureCell_ShouldAddSignatureCellOnTableInTheCorrectFormat()
+        {
+            //Arrange
+            var fileName = "blank.pdf";
+            var fileBytes = GetFileBytes(fileName);
+            var table = new Table
+            {
+                Layout = new TableLayout()
+                {
+                    CellMargin = new MarginInfo(2f, 2f, 2f, 2f),
+                    Position = 200f,
+                    Widths = "50 100 100 80 100",
+                    CellBorder = new BorderInfo(BorderSide.None, 0.20f),
+                    ColumnAdjustment = ColumnAdjustment.Customized
+                },
+                Rows = new List<IRow>
+                {
+                    new Row
+                        {
+                           Cells = new List<ICell>
+                            {
+                                new SignatureCell
+                                {
+                                    TextBoxProperties =  new TextBoxProperties()
+                                    {
+                                        Id = "txtTest",
+                                        Height = 20,
+                                        Width = 250 
+                                    },
+                                    SignatureRequest =  new SignatureRequest()
+                                    {
+                                        PageNumber = 1,
+                                        PartialName = "signature1",
+                                        Height = 20,
+                                        Width = 250
+                                    }
+                                }
+                             
+                            }
+                        }
+                }
+            };
+
+            //Act
+            var actual = table.Render(fileBytes);
+
+            //Assert
+            actual.Length.Should().BeGreaterThan(0);
+        }
+
+        private Table GetTable()
+        {
+            return new Table
+            {
+                Layout = new TableLayout
+                {
+                    CellMargin = new MarginInfo(2f, 2f, 2f, 2f),
+                    Position = 100f,
+                    Widths = "85 92 130 120",
+                    CellBorder = new BorderInfo(BorderSide.All, 0.20f),
+                    ColumnAdjustment = ColumnAdjustment.Customized
+                },
+                Rows = new List<IRow>
+                {
+                   new Row
+                   {
+                      Cells = new List<ICell>
+                            {
+                                new TextCell {
+                                    Text = "FULL NAME",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 15,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    Text = "ID No",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 15,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    Text = "ROLE",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 15,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    Text = "SIGNATURE",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 15,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Bold,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }}
+                            }
+                   },
+                   new Row
+                   {
+                      Cells = new List<ICell>
+                            {
+                                new TextCell {
+                                    Text = "Travis Frisinger",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    Text = "111111111",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    Text = "A dude",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Regular,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new SignatureCell
+                                {
+                                    TextBoxProperties =  new TextBoxProperties
+                                    {
+                                        Id = "txtTest",
+                                        Height = 20,
+                                        Width = 115
+                                    },
+                                    SignatureRequest =  new SignatureRequest()
+                                    {
+                                        PageNumber = 1,
+                                        PartialName = "signature1",
+                                        Height = 20,
+                                        Width = 115
+                                    }
+                                }
+                            }
+                   },
+                   new Row
+                   {
+                      Cells = new List<ICell>
+                            {
+                                new TextCell {
+                                    Text = "Thabani Tembe",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Italic,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    Text = "0005279632081",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Italic,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                new TextCell {
+                                    Text = "Apprentice",
+                                    TextProperties = new TextProperties
+                                    {
+                                        FontSize = 10,
+                                        FontType = "Arial",
+                                        FontStyle = FontStyles.Italic,
+                                        FontColor = Color.Black,
+                                        Invisible = false
+                                    }},
+                                 new SignatureCell
+                                {
+                                    TextBoxProperties =  new TextBoxProperties
+                                    {
+                                        Id = "txtTest2",
+                                        Height = 20,
+                                        Width = 115,
+                                    },
+                                    SignatureRequest =  new SignatureRequest()
+                                    {
+                                        PageNumber = 1,
+                                        PartialName = "signature12",
+                                        Height = 20,
+                                        Width = 115
+                                    }
+                                }
+                            }
+                   }  
+                }
+            };
+        }
+
+        private byte[] GetFileBytes(string text)
+        {
+            if (text.Contains("\\"))
+            {
+                return File.ReadAllBytes(text);
+            }
+            var baseDirectory = TestContext.CurrentContext.TestDirectory + "\\TestData\\";
+            var currentFilePath = Path.Combine(baseDirectory, text);
+            var fileBytes = File.ReadAllBytes(currentFilePath);
+
+            return fileBytes;
+        }
+    }
+}

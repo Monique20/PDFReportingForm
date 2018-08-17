@@ -1,0 +1,631 @@
+﻿using Aspose.Pdf;
+using Aspose.Pdf.Forms;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Aspose.Pdf.Annotations;
+using PdfReportingPoc.Domain.Pdf;
+using Aspose.Pdf.Facades;
+using Aspose.Pdf.Text;
+using System.Text;
+using System;
+using System.Data;
+using TextProperties = PdfReportingPoc.Domain.Pdf.TextProperties;
+
+namespace PdfReportingPoc.Fields
+{
+    public class PdfOperations : IPdfOperations
+    {
+        public PdfOperations()
+        {
+            var license = new License();
+            license.SetLicense("Aspose.Pdf.Lic");
+        }
+
+        // todo : delete this - should be on textcell already
+        public PdfFieldsOperationsResponse MarkFieldsReadOnly(byte[] template, List<PdfFields> listOfFields)
+        {
+            var results = new PdfFieldsOperationsResponse();
+            var documentBytes = new byte[0];
+            using (var incomingStream = new MemoryStream(template))
+            {
+                var pdfDocument = new Document(incomingStream);
+                foreach (var field in listOfFields)
+                {
+                    var fieldName = field.FieldName;
+                    bool fieldNotFound = GetField(pdfDocument, fieldName);
+                    if (fieldNotFound)
+                    {
+                        return FieldErrorMessage(documentBytes, results, fieldName);
+                    }
+                    pdfDocument.Form[fieldName].ReadOnly = true;
+                }
+                documentBytes = Save(pdfDocument);
+            }
+            results.Output = documentBytes;
+            return results;
+
+        }
+
+        // todo : delete this - should be on textcell already
+        public PdfFieldsOperationsResponse PopulateFieldValues(byte[] template, List<PdfFields> listOfFields)
+        {
+            var documentBytes = new byte[0];
+            var results = new PdfFieldsOperationsResponse();
+            using (var incomingStream = new MemoryStream(template))
+            {
+                var pdfDocument = new Document(incomingStream);
+
+                foreach (var field in listOfFields)
+                {
+                    var fieldName = field.FieldName;
+                    var fieldValue = field.FieldValue;
+
+                    var fieldNotFound = GetField(pdfDocument, fieldName);
+                    if (fieldNotFound)
+                    {
+                        return FieldErrorMessage(documentBytes, results, fieldName);
+                    }
+                    var textBoxField = pdfDocument.Form[fieldName] as TextBoxField;
+                    if (textBoxField != null)
+                    {
+                        var maxLength = (pdfDocument.Form[fieldName] as TextBoxField).MaxLen;
+                        var exceededLength = fieldValue.Length - maxLength;
+
+                        if (ValueExceededMaxLength(fieldValue, maxLength) && HasMaximumLength(maxLength))
+                        {
+                            results.Output = documentBytes;
+                            results.ErrorMessage = $"{fieldName} has exceeded its maximum value by {exceededLength}";
+
+                            return results;
+                        }
+                        textBoxField.Value = fieldValue;
+                        continue;
+                    }
+                    var checkboxField = pdfDocument.Form[fieldName] as CheckboxField;
+                    checkboxField.Checked = true;
+                }
+                documentBytes = Save(pdfDocument);
+            }
+            results.Output = documentBytes;
+            return results;
+        }
+
+        // todo : keep this!
+        public byte[] PasswordProtect(byte[] fileBytes, string password)
+        {
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                return new byte[0];
+            }
+
+            using (var incomingStream = new MemoryStream(fileBytes))
+            {
+                var pdfDocument = new Document(incomingStream);
+                pdfDocument.Encrypt(password, password, 0, CryptoAlgorithm.RC4x128);
+                using (var documentStream = new MemoryStream())
+                {
+                    pdfDocument.Save(documentStream);
+
+                    return documentStream.ToArray();
+                }
+            }
+        }
+
+        // todo : delete this - should be on textcell already
+        public PdfFieldsOperationsResponse InsertSignatureFields(byte[] template, List<Signatory> signatories, List<string> tableColumns)
+        {
+            var documentBytes = new byte[0];
+            var results = new PdfFieldsOperationsResponse();
+            var details = ValidateDetails(signatories);
+            if (!details)
+            {
+                results.ErrorMessage = "Invalid signatory details";
+                results.Output = template;
+                return results;
+            }
+            using (var incomingStream = new MemoryStream(template))
+            {
+                var pdfDocument = new Document(incomingStream);
+                var page = pdfDocument.Pages[1];
+                GetPopulatedTable(page, signatories, tableColumns);
+                documentBytes = SaveTable(pdfDocument);
+            }
+            results.Output = documentBytes;
+            return results;
+        }
+
+        // todo : delete this - not required
+        public byte[] ManipulatePdfElements(byte[] fileBytes, List<PdfElementsToManipulate> pdfElementsToManipulate)
+        {
+            var outputFileBytes = fileBytes;
+
+            foreach (var pdfElements in pdfElementsToManipulate)
+            {
+                if (pdfElements.FieldType == "Text")
+                {
+                    outputFileBytes = pdfElements.MakeItInvisible ? HideText(outputFileBytes, pdfElements.PdfElementName) : ShowText(outputFileBytes, pdfElements.PdfElementName);
+                }
+                else
+                {
+                    outputFileBytes = pdfElements.MakeItInvisible ? HideField(outputFileBytes, pdfElements.PdfElementName) : ShowField(outputFileBytes, pdfElements.PdfElementName);
+                }
+            }
+            return outputFileBytes;
+        }
+
+        // todo : delete this - not required
+        public byte[] HideText(byte[] fileBytes, string textToHide)
+        {
+            if (NullOrWhiteSpace(textToHide))
+            {
+                return fileBytes;
+            }
+            using (var fileStream = new MemoryStream(fileBytes))
+            {
+                var doc = new Document(fileStream);
+                var absorber = new TextFragmentAbsorber(textToHide);
+                doc.Pages[1].Accept(absorber);
+
+                var textFragmentCollection = absorber.TextFragments;
+
+                if (ListIsEmpty(textFragmentCollection))
+                {
+                    return fileStream.GetBuffer();
+                }
+
+                var textFragment = textFragmentCollection[textFragmentCollection.Count];
+                textFragment.TextState.Invisible = true;
+
+                var documentsBytes = Save(doc);
+                return documentsBytes;
+            }
+        }
+
+        // todo : delete this - not required
+        public byte[] ShowText(byte[] fileBytes, string textToShow)
+        {
+            if (NullOrWhiteSpace(textToShow))
+            {
+                return fileBytes;
+            }
+            using (var fileStream = new MemoryStream(fileBytes))
+            {
+                var pdfDocument = new Document(fileStream);
+                var absorber = new TextFragmentAbsorber(textToShow);
+                pdfDocument.Pages[1].Accept(absorber);
+
+                var textFragmentCollection = absorber.TextFragments;
+
+                if (ListIsEmpty(textFragmentCollection))
+                {
+                    return fileStream.GetBuffer();
+                }
+
+                var textFragment = textFragmentCollection[textFragmentCollection.Count];
+                textFragment.TextState.Invisible = false;
+
+                var documentsBytes = Save(pdfDocument);
+                return documentsBytes;
+            }
+        }
+
+        // todo : delete this - not required
+        public byte[] HideField(byte[] fileBytes, string fieldNameToHide)
+        {
+            if (NullOrWhiteSpace(fieldNameToHide))
+            {
+                return fileBytes;
+            }
+            using (var fileStream = new MemoryStream(fileBytes))
+            {
+                var pdfDocument = new Document(fileStream);
+                var formEditor = new FormEditor(pdfDocument);
+
+                if (FieldNotFound(pdfDocument, fieldNameToHide))
+                {
+                    return fileBytes;
+                }
+                formEditor.SetFieldAppearance(fieldNameToHide, AnnotationFlags.Hidden);
+                return Save(formEditor);
+            }
+        }
+
+        // todo : delete this - not required
+        public byte[] ShowField(byte[] fileBytes, string fieldNameToShow)
+        {
+            if (NullOrWhiteSpace(fieldNameToShow))
+            {
+                return fileBytes;
+            }
+            using (var fileStream = new MemoryStream(fileBytes))
+            {
+                var pdfDocument = new Document(fileStream);
+                var formEditor = new FormEditor(pdfDocument);
+
+                if (FieldNotFound(pdfDocument, fieldNameToShow))
+                {
+                    return fileBytes;
+                }
+                formEditor.SetFieldAppearance(fieldNameToShow, AnnotationFlags.Default);
+                return Save(formEditor);
+            }
+        }
+<<<<<<< HEAD
+=======
+        
+
+        public TextFragment CreateText(TextPropertiesRequest textProperties, int pageNumber)
+        {
+            var text = new TextFragment
+            {
+                Text = textProperties.Text,
+                TextState =
+                        {
+                            FontSize = textProperties.FontSize,
+                            Font = FontRepository.FindFont(textProperties.FontType),
+                            FontStyle = textProperties.FontStyle,
+                            ForegroundColor = textProperties.FontColor,
+                            Invisible = textProperties.Invisible
+                        },
+                Position = new Position(textProperties.PositionX, textProperties.PositionY)
+            };
+
+            return text;
+        }
+        
+>>>>>>> fixed merge conflicts
+        
+         // todo : delete this - should be on CheckboxField already
+        //public IEnumerable<CheckboxField> CreateCheckBoxes(CheckboxGroupRequest request)
+        //{
+        //    using(var stream=new MemoryStream())
+        //    {
+        //        var checkboxFields = new List<CheckboxField>();
+        //        var document = new Document();
+        //        document.Pages.Add();
+
+        //        var labels = request.Checkboxes.Select(r => r.Label);
+        //        var dataTable = CreateDataTable(labels, request.OptionsPerLine);
+        //        var table = CreateTable(dataTable, request.OptionsPerLine, request.Height, request.Width);
+
+        //        document.Pages[request.PageNumber].Paragraphs.Add(table);
+        //        document.Save(stream);
+                
+        //        var tableAbsorber = new TableAbsorber();
+        //        tableAbsorber.Visit(document.Pages[request.PageNumber]);
+
+        //        var rows = tableAbsorber.TableList.Last().RowList;
+
+        //        var index = 0;
+        //        foreach (var row in rows)
+        //        {
+        //            for (var i = 1; i < request.OptionsPerLine*2; i+=2)
+        //            {
+        //                index++;
+
+        //                if (request.Checkboxes.Count()>=index)
+        //                {
+        //                    var rectangle = row.CellList[i].Rectangle;
+
+        //                    rectangle.URY = rectangle.LLY +request.Height;
+        //                    rectangle.URX = rectangle.LLX +request.Width;
+
+        //                    var formEditor = new FormEditor();
+        //                    formEditor.BindPdf(document);
+        //                    formEditor.AddField(FieldType.CheckBox, request.Checkboxes.ElementAt(index-1).Id, request.PageNumber, (float)rectangle.LLX + 1f, (float)rectangle.LLY + .5f, (float)rectangle.URX - .5f, (float)rectangle.URY - .5f);
+
+        //                    var checkboxField = (CheckboxField)document.Form.Last();
+        //                    checkboxField.Border = new Border(checkboxField);
+        //                    checkboxField.Border.Width = 1;
+        //                    checkboxField.Required = request.Required;
+        //                    checkboxFields.Add((CheckboxField)document.Form.Last());
+        //                }
+        //            }
+        //        }
+                
+        //        document.Save(stream);
+        //        return checkboxFields;
+        //    }
+        //}
+        
+        
+        // todo : delete this - should be on CheckboxField already
+        //public RadioButtonField CreateGroupedCheckBoxes(CheckboxGroupRequest request)
+        //{
+        //    using (var stream = new MemoryStream())
+        //    {
+        //        var document = new Document();
+        //        document.Pages.Add();
+
+        //        var labels = request.Checkboxes.Select(r => r.Label);
+        //        var dataTable = CreateDataTable(labels, request.OptionsPerLine);
+        //        var table = CreateTable(dataTable, request.OptionsPerLine, request.Height, request.Width);
+
+        //        document.Pages[request.PageNumber].Paragraphs.Add(table);
+        //        document.Save(stream);
+        //        var radioButtonGroup = new RadioButtonField(document);
+
+        //        var tableAbsorber = new TableAbsorber();
+        //        tableAbsorber.Visit(document.Pages[request.PageNumber]);
+
+        //        var rows = tableAbsorber.TableList.Last().RowList;
+
+        //        var index = 0;
+        //        foreach (var row in rows)
+        //        {
+        //            for (var i = 1; i < request.OptionsPerLine * 2; i += 2)
+        //            {
+        //                index++;
+
+        //                if (request.Checkboxes.Count() >= index)
+        //                {
+        //                    var rectangle = row.CellList[i].Rectangle;
+
+        //                    var page = document.Pages[request.PageNumber];
+
+        //                    var option = new RadioButtonOptionField(page, rectangle);
+        //                    option.Style = BoxStyle.Check;
+        //                    option.OptionName = labels.ElementAt(index - 1);
+        //                    option.Border = new Border(option);
+        //                    option.Border.Style = BorderStyle.Solid;
+        //                    option.Border.Width = 1;
+        //                    option.Characteristics.Border = System.Drawing.Color.Black;
+        //                    radioButtonGroup.Add(option);
+        //                }
+        //            }
+        //        }
+
+        //        radioButtonGroup.Required = request.Required;
+        //        document.Form.Add(radioButtonGroup);
+        //        document.Save(stream);
+        //        return radioButtonGroup;
+        //    }
+        //}
+
+        private bool FieldNotFound(Document pdfDocument, string fieldName)
+        {
+            return !pdfDocument.Form.Any(x => x.FullName.Equals((fieldName)));
+        }
+
+        private bool NullOrWhiteSpace(string textToHide)
+        {
+            return string.IsNullOrWhiteSpace(textToHide);
+        }
+
+        private static bool ListIsEmpty(TextFragmentCollection textFragmentCollection)
+        {
+            return !textFragmentCollection.Any();
+        }
+
+        // todo : delete this
+        private void GetPopulatedTable(Page page, List<Signatory> signatories, List<string> tableColumns)
+        {
+            var table = new Table { Top = 120 };
+            var columnCoordinates = "100 100 100 130";
+            var cellBorder = new BorderInfo(BorderSide.All, 0.1F);
+            var tableBorder = new BorderInfo(BorderSide.All, 1F);
+            CreateTable(page, table, tableColumns, columnCoordinates, cellBorder, tableBorder);
+            Populate(table, signatories);
+        }
+
+        // todo : delete this
+        private void CreateTable(Page page, Table table, List<string> tableColumns, string columnCoordinates, BorderInfo cellBorder, BorderInfo tableBorder)
+        {
+            page.Paragraphs.Add(table);
+            table.ColumnWidths = columnCoordinates;
+            table.DefaultCellBorder = cellBorder;
+            table.Border = tableBorder;
+
+            var margin = new MarginInfo
+            {
+                Top = 7f,
+                Left = 5f,
+                Right = 5f,
+                Bottom = 5f
+            };
+            table.DefaultCellPadding = margin;
+
+            var row = table.Rows.Add();
+            foreach (var column in tableColumns)
+            {
+                row.Cells.Add(column);
+            }
+        }
+
+        // todo : delete this
+        private void Populate(Table table, List<Signatory> signatories)
+        {
+            var row = table.Rows.Add();
+            foreach (var signatory in signatories)
+            {
+                var name = signatory.Name;
+                var id = signatory.IdNo;
+                var role = signatory.Role;
+
+                row = table.Rows.Add();
+                row.Cells.Add(name);
+                row.Cells.Add(id);
+                row.Cells.Add(role);
+                row.Cells.Add();
+            }
+        }
+
+        // todo : delete this
+        private bool ValidateDetails(List<Signatory> signatories)
+        {
+            foreach (var signatory in signatories)
+            {
+                var name = signatory.Name;
+                var id = signatory.IdNo;
+                var role = signatory.Role;
+
+                if (Invalid(name, id, role))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool Invalid(string name, string id, string role)
+        {
+            return string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(role);
+        }
+
+        // todo : delete this
+        private byte[] SaveTable(Document pdfDocument)
+        {
+            byte[] documentBytes;
+            using (var documentStream = new MemoryStream())
+            {
+                pdfDocument.Save(documentStream);
+                var signedDocument = CreateSignature(documentStream);
+                signedDocument.Save(documentStream);
+                documentBytes = documentStream.ToArray();
+            }
+            return documentBytes;
+        }
+
+        // todo : delete this - should be on signature field already
+        private Document CreateSignature(MemoryStream documentStream)
+        {
+            var pdfDocument = new Document(documentStream);
+            var absorber = new TableAbsorber();
+            absorber.Visit(pdfDocument.Pages[1]);
+            var totalRows = absorber.TableList[0].RowList.Count;
+            for (int i = 1; i < totalRows; i++)
+            {
+                var signatureCell = absorber.TableList[0].RowList[i].CellList.Count - 1;
+                var xUpperRightCorner = absorber.TableList[0].RowList[i].CellList[signatureCell].Rectangle.URX;
+                var yUpperRightCorner = absorber.TableList[0].RowList[i].CellList[signatureCell].Rectangle.URY;
+                var xLowerLeftCorner = absorber.TableList[0].RowList[i].CellList[signatureCell].Rectangle.LLX;
+                var yLowerLeftCorner = absorber.TableList[0].RowList[i].CellList[signatureCell].Rectangle.LLY;
+                var formEditor = new FormEditor();
+                formEditor.BindPdf(pdfDocument);
+                formEditor.AddField(FieldType.Signature, "SignatureField", 1, (float)xLowerLeftCorner, (float)yLowerLeftCorner, (float)xUpperRightCorner, (float)yUpperRightCorner);
+            }
+            return pdfDocument;
+        }
+
+        // todo : delete this
+        private PdfFieldsOperationsResponse FieldErrorMessage(byte[] documentBytes, PdfFieldsOperationsResponse results, string fieldName)
+        {
+            results.Output = documentBytes;
+            results.ErrorMessage = $"{fieldName} cannot be found";
+
+            return results;
+        }
+
+        // todo : delete this - should be on on TextCell already
+        private bool ValueExceededMaxLength(string fieldValue, int maxLength)
+        {
+            return fieldValue.Length > maxLength;
+        }
+
+        private bool HasMaximumLength(int maxLength)
+        {
+            return maxLength != -1;
+        }
+
+        // todo : delete this
+        private bool GetField(Document pdfDocument, string field)
+        {
+            return !pdfDocument.Form.Any(x => x.FullName.Equals((field)));
+        }
+
+        // todo : delete this
+        private byte[] Save(Document pdfDocument)
+        {
+            byte[] documentBytes;
+            using (var documentStream = new MemoryStream())
+            {
+                pdfDocument.Save(documentStream);
+                documentBytes = documentStream.ToArray();
+            }
+            return documentBytes;
+        }
+
+        // todo : delete this
+        private static byte[] Save(ISaveableFacade formEditor)
+        {
+            using (var stream = new MemoryStream())
+            {
+                formEditor.Save(stream);
+                return stream.ToArray();
+            }
+        }
+
+        // todo : delete this
+        private Table CreateTable(DataTable dataTable, int optionsPerLine, float height, float width)
+        {
+            var columns = (415 / optionsPerLine)-width;
+
+            var widths = Enumerable.Range(1, optionsPerLine)
+                .Select(r => $"{columns} {width}");
+
+            var columnWidths = string.Join(" ", widths);
+
+            var table = new Table
+            {
+                Top = 50,
+                ColumnWidths = columnWidths,
+                DefaultCellPadding=new MarginInfo { Left=50},
+                DefaultCellBorder = new BorderInfo(BorderSide.Box, .5f, Color.White)
+            };
+
+            var totalColumns = optionsPerLine * 2;
+            table.ImportDataTable(dataTable, false, 0, 0, dataTable.Rows.Count, totalColumns);
+
+            foreach(var row in table.Rows)
+            {
+                row.FixedRowHeight = height;
+            }
+
+            return table;
+        }
+        
+
+        // todo : delete this
+        private DataTable CreateDataTable(IEnumerable<string> labels, int optionsPerLine)
+        {
+            var dataTable = new DataTable();
+
+            for (int i = 0; i < optionsPerLine; i++)
+            {
+                dataTable.Columns.Add($"Optipon{i}", typeof(string));
+                dataTable.Columns.Add($"Selected{i}", typeof(string));
+            }
+            
+            var totalRows = labels.Count() / optionsPerLine;
+
+            if(labels.Count() % optionsPerLine > 0)
+            {
+                totalRows++;
+            }
+
+            for (var i = 0; i < totalRows; i++)
+            {
+                var newRow = dataTable.NewRow();
+                dataTable.Rows.Add(newRow);
+            }
+
+            var counter = 0;
+            for (int i = 0; i < totalRows; i++)
+            {
+                for (int j = 0; j < optionsPerLine*2; j++)
+                {
+                    if (j % 2 == 0)
+                    {
+                        if (counter < labels.Count())
+                        {
+                            dataTable.Rows[i][j] = labels.ElementAt(counter);
+                            counter++;
+                        }
+                    }
+                }
+            }
+            return dataTable;
+        }
+    }
+}

@@ -1,0 +1,24 @@
+Like
+ - Pdf Creation
+ - Work Pace
+ - Merges working better***
+ - Stand-ups**
+ - Team work*****
+ - T-rav Feedback****
+ - Deeper exploration of aspose.pdf
+ - New features -> Real world, adding value
+ - Pairs
+ - Frequement Commits
+ - PdfElements 6 -> Easier then Acrobat
+ - Weekly Demo
+Dislike
+ - Unclear requirements**
+ - Lack of big picture
+ - The struggle
+ - Cannot install KDiff
+Do Differently
+ - Clear requirements
+ - Ask more questions
+ - Commit more frequently
+ - Group functionality
+ - String Kata?

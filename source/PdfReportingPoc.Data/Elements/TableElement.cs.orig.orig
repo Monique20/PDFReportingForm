@@ -1,0 +1,162 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using Aspose.Pdf;
+using PdfReportingPoc.Domain.Elements;
+using Aspose.Pdf.Forms;
+using Aspose.Pdf.Text;
+using PdfReportingPoc.Domain.Pdf;
+using PdfReportingPoc.Fields;
+using Aspose.Pdf.Facades;
+
+namespace PdfReportingPoc.Elements
+{
+    public class TableElement : ITable
+    {
+        public List<IRow> Rows { get; set; }
+        public TableLayout Layout { get; set; }
+
+        public byte[] Render(byte[] template)
+        {
+            var documentBytes = new byte[0];
+            if (Rows.Count == 0)
+            {
+                return documentBytes;
+            }
+           
+            using (var incomingStream = new MemoryStream(template))
+            {
+                var pdfDocument = new Document(incomingStream);
+                var table = CreateTable();
+                foreach (var row in Rows)
+                {
+                    row.Render(table);
+
+                }
+                pdfDocument.Pages[1].Paragraphs.Add(table);
+                documentBytes = Save(pdfDocument);
+            }
+            var newDocumentBytes = InsertCombFields(documentBytes);
+            return newDocumentBytes;
+        }
+
+        private byte[] Save(Document pdfDocument)
+        {
+            byte[] documentBytes;
+            using (var documentStream = new MemoryStream())
+            {
+                pdfDocument.Save(documentStream);
+                documentBytes = documentStream.ToArray();
+            }
+            return documentBytes;
+        }
+
+        private byte[] InsertCombFields(byte[] documentBytes)
+        {
+            byte[] newDocumentBytes;
+            using (var newStream = new MemoryStream(documentBytes))
+            {
+                var newPdfDocument = new Document(newStream);
+
+                foreach (var row in Rows)
+                {
+                    row.Format(newPdfDocument);
+                }
+                newDocumentBytes = Save(newPdfDocument);
+            }
+            return newDocumentBytes;
+        }
+
+        private Table CreateTable()
+        {
+            return new Table
+            {
+                ColumnAdjustment = Layout.ColumnAdjustment,
+                ColumnWidths = Layout.Widths,
+                Top = Layout.Position,
+                DefaultCellPadding = Layout.CellMargin,
+                DefaultCellBorder = Layout.CellBorder
+            };
+        }
+    }
+
+        
+                
+              
+              
+
+
+        }
+
+        public void Format(Document pdfDocument)
+        {
+
+        }
+    }
+
+<<<<<<< HEAD
+
+=======
+    public class SignatureCell : ICell
+    {
+        public SignatureRequest SignatureRequest { get; set; }
+        
+        public void Render(Row row)
+        {
+            var cell = row.Cells.Add();
+            var pdfDocument = new Document();
+          
+            cell.Paragraphs.Add(new SignatureField(pdfDocument.Pages[SignatureRequest.PageNumber], new Rectangle(392, 667, 507, 698))
+            {
+                PartialName = SignatureRequest.PartialName,
+                Width = SignatureRequest.Width,
+                Height = SignatureRequest.Height
+            });   
+            
+        }
+
+        public byte[] Signature(byte[] template)
+        {
+            using (var incomingStream = new MemoryStream(template))
+            {
+                var pdfDocument = new Document(incomingStream);
+
+                var tableAbsorber = new TableAbsorber();
+                tableAbsorber.Visit(pdfDocument.Pages[SignatureRequest.PageNumber]);
+
+                var rows = tableAbsorber.TableList.Last().RowList;
+
+                foreach(var row in rows)
+                {
+                    var si = new SignatureField(pdfDocument.Pages[SignatureRequest.PageNumber], new Rectangle(392, 667, 507, 698))
+                    {
+                        PartialName = SignatureRequest.PartialName,
+                        Width = SignatureRequest.Width,
+                        Height = SignatureRequest.Height
+                    };
+                    pdfDocument.Form.Add(si);
+                }
+                var bytes = SaveDoc(pdfDocument);
+                return bytes;
+            }
+        }
+
+        private byte[] SaveDoc(Document pdfDocument)
+        {
+            byte[] documentBytes;
+            using (var documentStream = new MemoryStream())
+            {
+                pdfDocument.Save(documentStream);
+                documentBytes = documentStream.ToArray();
+            }
+            return documentBytes;
+>>>>>>> wip
+}
+
+            //var cell = row.Cells.Add();
+            //cell.Paragraphs.Add(new SignatureField(pdfDocument.Pages[SignatureRequest.PageNumber], new Rectangle(392, 667, 507, 698))
+            //{
+            //    PartialName = SignatureRequest.PartialName,
+            //    Width = SignatureRequest.Width,
+            //    Height = SignatureRequest.Height
+            //});

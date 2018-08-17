@@ -1,0 +1,136 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using Aspose.Pdf;
+using FluentAssertions;
+using NUnit.Framework;
+using PdfReportingPoc.Elements;
+
+<<<<<<< HEAD
+namespace PdfReportingPoc.Data.Tests.Elements
+{
+    [TestFixture]
+    public class HeaderElementTests
+    {
+=======
+namespace PdfReportingPoc.Data.Tests.Elements
+{
+    [TestFixture]
+    [Ignore("wip")]
+    public class HeaderElementTests
+    {
+>>>>>>> fixed merge conflicts
+        [Test]
+        public void InsertHeader_GivenText_ShouldAddHeaderOnEachPage()
+        {
+            //Arrange
+            var fileName = "DemoForm.pdf";
+            var baseDirectory = TestContext.CurrentContext.TestDirectory + "\\TestData\\";
+            var currentFilePath = Path.Combine(baseDirectory, fileName);
+            var fileBytes = File.ReadAllBytes(currentFilePath);
+
+            var fragements = new List<TextStampFragment>
+            {
+                new TextStampFragment
+                {
+                   Label = "Account Number: ",
+                   Text = "12345",
+                   SpacesNeeded = 28
+                },
+                new TextStampFragment
+                {
+                    Label = "Application Number:",
+                    Text = "3620115 ",
+                    SpacesNeeded = 50
+                },
+                new TextStampFragment
+                {
+                    Label = "Date:",
+                    Text = DateTime.Now.ToString("MM/dd/yy hh:mm:ss tt "),
+                    SpacesNeeded = 6
+                }
+            };
+
+            var textStampElements = new List<TextStampElement>
+            {
+                new TextStampElement
+                {
+                    Fragments = fragements,
+                    MarginTop = 55,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Top
+                },
+                new TextStampElement
+                {
+                    Fragments = new List<TextStampFragment>
+                    {
+                        new TextStampFragment
+                        {
+                            Text = "__________________________________________________________________________________________________"
+                        }
+                    },
+                    MarginTop = 60,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Top
+                }
+            };
+            var sut = new HeaderSection();
+            sut.TextFragements.AddRange(textStampElements);
+
+            //Act
+            var actual = sut.Render(fileBytes);
+            //Assert
+            actual.Length.Should().BeGreaterThan(fileBytes.Length);
+<<<<<<< HEAD
+        }
+    }
+}
+=======
+        }
+
+        //[Test]
+        //public void NumberOfWhitespacesNeeded_GivenNumberOfSpacesNeededAndLabelLength_ShouldReturnTheDifference()
+        //{
+        //    //Arrange
+        //    var listOfFields = new List<HeaderElement2>
+        //    {
+        //            new HeaderElement2
+        //            {
+        //                Label = "Account Number: ",
+        //                Data = "1254689",
+        //                SpacesNeeded = 28,
+        //                Visibility = true
+        //            }
+        //    };
+        //    var expected = 12;
+        //    //Act
+        //    var actual = listOfFields[0].NumberOfWhiteSpacesRequired();
+
+        //    //Assert
+        //    Assert.AreEqual(expected, actual);
+        //}
+
+        //[Test]
+        //public void NumberOfWhitespacesNeeded_GivenDifferenceIsNegative_ShouldReturnMessage()
+        //{
+        //    //Arrange
+        //    var listOfFields = new List<HeaderElement2>
+        //    {
+        //            new HeaderElement2
+        //            {
+        //                Label = "Account Number: ",
+        //                Data = "1254689",
+        //                SpacesNeeded = 15,
+        //                Visibility = true
+        //            }
+        //    };
+        //    var expected = 1;
+        //    //Act
+        //    var actual = listOfFields[0].NumberOfWhiteSpacesRequired();
+
+        //    //Assert
+        //    Assert.AreEqual(expected, actual);
+        //}
+    }
+}
+>>>>>>> fixed merge conflicts

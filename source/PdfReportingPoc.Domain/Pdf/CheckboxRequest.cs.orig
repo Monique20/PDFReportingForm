@@ -1,0 +1,15 @@
+﻿namespace PdfReportingPoc.Domain.Pdf
+{
+    public class CheckboxRequest
+    {
+        public string Id { get; set; }
+        public double Width { get; set; }
+        public double Height { get; set; }
+        public bool Required { get; set; }
+<<<<<<< HEAD:source/PdfReportingPoc.Domain/Pdf/CheckboxRequest.cs
+=======
+        public bool ForceComb { get; set; }
+      
+>>>>>>> removed unused usings and refactored:source/PdfReportingPoc.Domain/Pdf/TextBoxRequest.cs
+    }
+}
